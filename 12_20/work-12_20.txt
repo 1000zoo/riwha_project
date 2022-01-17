@@ -1,0 +1,33 @@
+//work1은 3개의 시트가 있습니다//
+
+
+*work1*
+
+lane1_mid_lat : center_lat - |center_lat - side_lat|/6
+lane1_mid_lng : center_lng + |center_lng - side_lng|/6
+// center_lat - side_lat과 center_lng - side_lng는 절댓값입니다. 
+
+lane1_mid_dist : (center_lat, center_lng)와 (lane1_mid_lat, lane1_mid_lng)의 거리
+
+
+err_dist : (lane1_mid_lat, lane1_mid_lng)와 (lat,lng)의 거리 측정 후 
+	gps_lane이 'lane1'일 경우, cenmin<lane1_mid_dist 경우 마이너스(-) 붙혀주세요. 
+
+
+
+
+* work2 * 
+
+
+lane3_mid_lat : side_lat + |center_lat - side_lat|/6
+lane3_mid_lng : side_lng + |center_lng - side_lng|/6
+// center_lat - side_lat과 center_lng - side_lng는 절댓값입니다. 
+
+lane3_mid_dist : (side_lat, side_lng)와 (lane3_mid_lat, lane3_mid_lng)의 거리
+
+
+err_dist : (lane3_mid_lat, lane3_mid_lng)와 (lat,lng)의 거리 측정 후 
+	gps_lane이 'lane1','lane2'일 경우 마이너스(-) 붙혀주세요	
+	gps_lane이 'lane3'일 경우 sidemin>lane3_mid_dist 경우 마이너스(-) 붙혀주세요. 
+	// work2의 err_dist는 gps_lane이 'lane3'이고 sidemin<lane3_mid_dist 일때만 플러스(+) 
+	 

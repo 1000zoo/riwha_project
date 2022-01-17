@@ -1,0 +1,52 @@
+
+** 1차선/2차선/3차선 모두 gps_lane의 값이 없으면 작업 안하셔도 됩니다 ! 
+
+
+
+
+
+*1차선*
+
+lane1_mid_lat : center_lat - |center_lat - side_lat|/6
+lane1_mid_lng : center_lng + |center_lng - side_lng|/6
+// center_lat - side_lat과 center_lng - side_lng는 절댓값입니다. 
+
+lane1_mid_dist : (center_lat, center_lng)와 (lane1_mid_lat, lane1_mid_lng)의 거리
+
+
+lane1_err_dist : (lane1_mid_lat, lane1_mid_lng)와 (lat,lng)의 거리 측정 후 
+	gps_lane이 'lane1'일 경우, cenmin<lane1_mid_dist 경우 마이너스(-) 붙혀주세요. 
+
+
+
+*2차선*
+
+lane2_mid_lat : side_lat와 center_lat의 중앙 위/경도 좌표를 구해주세요.
+lane2_mid_lng : side_lng와 center_lng의 중앙 위/경도 좌표를 구해주세요.
+lane2_err_dist는 lane2_mid와 lat/lng의 거리 측정 후 , 
+	gps_lane이 1차선을 찍었을 경우에는 마이너스(-)를 붙혀주세요.
+	gps_lane이 2차선을 찍었을 경우 중 cenmin<sidemin 인 경우 마이너스(-)를 붙혀주세요.
+
+
+
+
+*3차선* 
+
+
+lane3_mid_lat : side_lat + |center_lat - side_lat|/6
+lane3_mid_lng : side_lng + |center_lng - side_lng|/6
+// center_lat - side_lat과 center_lng - side_lng는 절댓값입니다. 
+
+lane3_mid_dist : (side_lat, side_lng)와 (lane3_mid_lat, lane3_mid_lng)의 거리
+
+
+lane3_err_dist : (lane3_mid_lat, lane3_mid_lng)와 (lat,lng)의 거리 측정 후 
+	gps_lane이 'lane1','lane2'일 경우 마이너스(-) 붙혀주세요	
+	gps_lane이 'lane3'일 경우 sidemin>lane3_mid_dist 경우 마이너스(-) 붙혀주세요. 
+	// work2의 err_dist는 gps_lane이 'lane3'이고 sidemin<lane3_mid_dist 일때만 플러스(+) 
+	 
+
+
+
+
+
