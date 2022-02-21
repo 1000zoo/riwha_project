@@ -1,4 +1,3 @@
-
 def nothing(unit, *some):
     result = 0
     for i in some:
