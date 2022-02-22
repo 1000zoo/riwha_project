@@ -4,14 +4,14 @@ from digi.xbee.devices import *
 from datetime import datetime
 import interface
 
-PORT = 'COM6'
+PORT = 'COM5'
 BAUD_RATE = 9600
 
-VEHICLE_ID = "97na1423" #차량 번호
+VEHICLE_ID = "97ga1006" #차량 번호
 
 LANE = "lane2"          #주행 차선
-DETECTED = False         #차량 감지
-GPS = "36.12320100012/123.5321500000"
+DETECTED = True         #차량 감지
+GPS = "36.1230103200/123.53200123000"
 AZIMUTH_ANGLE = 32.21966388369947
 
 #main
@@ -29,8 +29,8 @@ def main():
         init_user()
         
         while True:
-            lane_update()
-            if not isCallbackOn:        #콜백함수가 중복되는 것을 막기위해
+            lane_check()
+            if not isCallbackOn:
                 broadbee.add_data_received_callback(data_receive_callback)
                 isCallbackOn = True
 
@@ -47,22 +47,20 @@ def main():
     except InvalidOperatingModeException as err:
         print(err)
 
-def lane_update():
-    userInfo["lne"] = get_lane()
+def lane_check():
+    userInfo["lne"] = LANE
+
 def gps_update():
     userInfo["gps"] = get_gps()
+    
+def get_gps():
+    return GPS
+    
 def azi_update():
     userInfo["azi"] = get_azi()
 
-#차선, gps, 방위각, 차량감지 알고리즘 추가
-def get_lane():
-    return LANE
-def get_gps():
-    return GPS
 def get_azi():
     return round(AZIMUTH_ANGLE, 7)
-def is_detected():
-    return DETECTED
 
 def init_user():
     global userInfo
@@ -71,6 +69,8 @@ def init_user():
         "nId" : broadbee.get_node_id(),
     }
 
+def is_detected():
+    return DETECTED
 
 def data_receive_callback(xbee_message):
     global isCallbackOn
@@ -105,7 +105,7 @@ def is_my_back(azi, gps):
     myg = str_to_list(get_gps())    #my gps
     reg = str_to_list(gps)          #received gps
     try:
-        a = Azimuth(myg[0], myg[1], reg[0], reg[1])
+        a = Azimuth(float(myg[0]), float(myg[1]), float(reg[0]), float(reg[1]))
         if abs(float(a) - float(azi)) > 1:
             return True
         else:
@@ -116,12 +116,7 @@ def is_my_back(azi, gps):
     
 
 def str_to_list(t):
-    if not t.__contains__("/"):
-        raise IndexError
-    k = t.split("/")
-    k[0] = float(k[0])
-    k[1] = float(k[1])
-    return k
+    return t.split("/")
 
 def data_send_reactive(data):
     interface.data_send_reactive_if()
