@@ -111,17 +111,8 @@ def data_send_reactive(to): #X
     interface.data_send_reactive_if()
     print("reacting to %s" % to)
     data_to_send = make_dict_from("lne", "vId")       #보낼 정보를 str로 생성
-    print("!!!!!")
-    print(to)
-    print("!!!!!")
     net = broadbee.get_network()
-    print("@@@@@")
-    print(to)
-    print("@@@@@")
     reac = net.discover_device(to)
-    print("#####")
-    print(to)
-    print("#####")
     broadbee.send_data(reac, data_to_send)
 
 

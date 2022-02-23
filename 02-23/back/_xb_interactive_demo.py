@@ -1,42 +1,38 @@
+from re import I
 from digi.xbee.devices import *
-from datetime import datetime
+import datetime
 import interface
 import xb_util as xu
 import drive_info as di
 
 PORT = 'COM5'
 BAUD_RATE = 9600
-VEHICLE_ID = "97ba1006" #차량 번호
+VEHICLE_ID = "123ba4567" #차량 번호
 
 #main
 def main():
-    global isCallbackOn
     global userInfo
     global broadbee
-    time.sleep
     interface.main_if()
     userInfo = {}
-    isCallbackOn = False
     broadbee = XBeeDevice(PORT, BAUD_RATE)
 
     try:
         broadbee.open()
         init_user()
+        broadbee.add_data_received_callback(data_receive_callback)
         
         while True:
             lane_update()
             gps_update()
             azi_update()
-            if not isCallbackOn:        #콜백함수가 중복되는 것을 막기위해
-                broadbee.add_data_received_callback(data_receive_callback)
-                isCallbackOn = True
-
+            
             if di.is_detected():
                 data_broadcast()
             else:
                 print("not dectected...")
-            input()
             print("end of the function")
+            input()
             
     except InvalidOperatingModeException as err:
         print(err)
@@ -45,9 +41,9 @@ def main():
 def init_user():
     global userInfo
     userInfo = {
-        "vId" : VEHICLE_ID,
-        "nId" : broadbee.get_node_id(),
+        "vid" : VEHICLE_ID,
     }
+    broadbee.set_node_id(userInfo["vid"])
 
 #주행 정보 업데이트, 주기적으로
 def lane_update():
@@ -59,12 +55,9 @@ def azi_update():
 
 
 def data_receive_callback(xbee_message):
-    global isCallbackOn
-    
-    isCallbackOn = False
     interface.data_receive_callback_if()
     dataReceived = xu.string_to_dict(xbee_message.data.decode())
-    print(datetime.now())
+    print(datetime.datetime.now())
     print(dataReceived)
     
     try:
@@ -73,7 +66,7 @@ def data_receive_callback(xbee_message):
             if is_my_back(dataReceived["azi"], dataReceived["gps"]):
                 print("gps: %s" % dataReceived["gps"])  #받은 정보 처리 추가
                 print("my back car")
-                data_send_reactive(dataReceived["nId"])
+                data_send_reactive(dataReceived["vid"])
             else:
                 print("not my back car")
         else:
@@ -82,7 +75,7 @@ def data_receive_callback(xbee_message):
         #예외 추가
         if str(err) == "'azi'" or \
             str(err) == "'gps'":
-            #답장이 아니라는 뜻
+            #받은 정보가 답장인 경우
             pass
         elif str(err) == "'imb'":
             print("Invalid gps data")
@@ -105,17 +98,18 @@ def is_my_back(azi, gps):
 
 def data_broadcast():
     interface.data_braodcast_if()
-    data_to_send = make_dict_from("lne", "gps", "nId", "azi")       #보낼 정보를 str로 생성
-    print(data_to_send)
+    data_to_send = make_dict_from("vid", "lne", "gps", "azi")       #보낼 정보를 str로 생성
     broadbee.send_data_broadcast(data_to_send)
     
 def data_send_reactive(to): #X
     interface.data_send_reactive_if()
     print("reacting to %s" % to)
-    data_to_send = make_dict_from("lne", "vId")       #보낼 정보를 str로 생성
+    data_to_send = make_dict_from("lne", "vid")       #보낼 정보를 str로 생성
     net = broadbee.get_network()
     reac = net.discover_device(to)
     broadbee.send_data(reac, data_to_send)
+    print(datetime.datetime.now())
+    send_time = datetime.datetime.now()
 
 
 def make_dict_from(*labels):

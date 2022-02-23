@@ -41,7 +41,7 @@ def main():
                 
             else:
                 print("not dectected...")
-            time.sleep(5)
+            input()
             print("end of the function")
             
     except InvalidOperatingModeException as err:
